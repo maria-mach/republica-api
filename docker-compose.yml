@@ -1,0 +1,13 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: demo
+      JWT_SECRET: ${JWT_SECRET:-chave-local-demonstracao-republica-2026}
+    volumes:
+      - dados:/app/data
+
+volumes:
+  dados:

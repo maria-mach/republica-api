@@ -1,0 +1,40 @@
+Validação realizada em 25/10/2026.
+Java 21.0.8; Spring Boot 4.1.0.
+
+Comando: ./mvnw.cmd clean verify
+Resultado: sucesso; target/republica-api-1.0.0.jar gerado.
+
+Testes:
+- DadosDemonstracaoTest: 1 aprovado.
+- DivisaoServiceTest: 6 aprovados.
+- RepublicaApiTest: 17 aprovados.
+Total: 24 testes; zero falhas, erros ou ignorados.
+Banco dos testes: H2 em memória, isolado dos dados reais.
+
+JaCoCo 0.8.12:
+- Linhas: 283 cobertas de 299 (94,65%).
+- Instruções: 2582 cobertas de 2732 (94,51%).
+- Decisões: 111 cobertas de 134 (82,84%).
+Relatório reproduzível: target/site/jacoco/index.html.
+
+Validação adicional: JAR iniciado na porta 8081, perfil demo,
+banco HSQLDB em memória temporário.
+23 requisições HTTP aprovadas:
+- Login dos três moradores de demonstração.
+- Acesso sem token rejeitado (401).
+- Consulta dos moradores da república.
+- Lançamento de despesa e cálculo de saldo.
+- Registro de pagamento pendente sem alterar saldo.
+- Confirmação pelo pagador rejeitada (403).
+- Confirmação pelo recebedor e saldos zerados.
+- Relatórios por categoria, mensal e extrato.
+- Cadastro e geração recorrente sem duplicação.
+- Fechamento mensal e edição rejeitada (400).
+- OpenAPI e Swagger acessíveis sem token.
+O processo de demonstração foi encerrado ao terminar.
+
+Diagramas de casos de uso e classes renderizados e conferidos visualmente.
+Dockerfile e docker-compose.yml preparados, mas o contêiner NÃO foi
+executado: Docker não está instalado neste ambiente de validação.
+Antes da apresentação, validar em uma máquina com Docker:
+docker compose up --build

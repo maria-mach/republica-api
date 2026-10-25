@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1230" height="1160" viewBox="0 0 1230 1160" role="img" aria-label="Classes de domínio — API de Despesas da República">
+<style>text{font-family:Arial,sans-serif;fill:#172b46;font-size:16px}.title{font-size:26px;font-weight:bold}.head{font-size:20px;font-weight:bold}.small{font-size:14px}path,line{stroke:#52667c;stroke-width:1.6;fill:none}</style>
+<rect width="100%" height="100%" fill="white"/>
+<text x="40" y="42" class="title">Classes de domínio — API de Despesas da República</text>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6" fill="white"/></marker></defs>
+<path d="M365,260 H440"/>
+<path d="M730,260 H805"/>
+<path d="M585,289 V570 H210 V650"/>
+<path d="M585,289 V650"/>
+<path d="M585,289 V570 H950 V650"/>
+<path d="M950,650 V497"/>
+<text x="402" y="235" class="small" text-anchor="middle">membros</text>
+<text x="402" y="282" class="small" text-anchor="middle">0..1 / *</text>
+<text x="767" y="235" class="small" text-anchor="middle">despesas</text>
+<text x="767" y="282" class="small" text-anchor="middle">1 / *</text>
+<text x="230" y="558" class="small" text-anchor="middle">pagamentos: 1 / *</text>
+<text x="600" y="610" class="small" text-anchor="middle">fechamentos: 1 / *</text>
+<text x="770" y="558" class="small" text-anchor="middle">modelos: 1 / *</text>
+<text x="970" y="535" class="small" text-anchor="middle">gera: 0..1 / *</text>
+<rect x="75" y="120" width="290" height="195" rx="5" fill="#fff" stroke="#52667c" stroke-width="2"/>
+<path d="M75,165 H365"/>
+<text x="220.0" y="150" class="head" text-anchor="middle">Morador</text>
+<text x="87" y="192" class="small" text-anchor="start">+ id: Long</text>
+<text x="87" y="218" class="small" text-anchor="start">+ nome: String</text>
+<text x="87" y="244" class="small" text-anchor="start">+ email: String</text>
+<text x="87" y="270" class="small" text-anchor="start">+ senhaHash: String</text>
+<text x="87" y="296" class="small" text-anchor="start">+ republicaId: Long</text>
+<rect x="440" y="120" width="290" height="169" rx="5" fill="#fff" stroke="#52667c" stroke-width="2"/>
+<path d="M440,165 H730"/>
+<text x="585.0" y="150" class="head" text-anchor="middle">Republica</text>
+<text x="452" y="192" class="small" text-anchor="start">+ id: Long</text>
+<text x="452" y="218" class="small" text-anchor="start">+ nome: String</text>
+<text x="452" y="244" class="small" text-anchor="start">+ codigoConvite: String</text>
+<text x="452" y="270" class="small" text-anchor="start">+ administradorId: Long</text>
+<rect x="805" y="120" width="290" height="377" rx="5" fill="#fff" stroke="#52667c" stroke-width="2"/>
+<path d="M805,165 H1095"/>
+<text x="950.0" y="150" class="head" text-anchor="middle">Despesa</text>
+<text x="817" y="192" class="small" text-anchor="start">+ id: Long</text>
+<text x="817" y="218" class="small" text-anchor="start">+ republicaId: Long</text>
+<text x="817" y="244" class="small" text-anchor="start">+ autorId: Long</text>
+<text x="817" y="270" class="small" text-anchor="start">+ pagadorId: Long</text>
+<text x="817" y="296" class="small" text-anchor="start">+ descricao: String</text>
+<text x="817" y="322" class="small" text-anchor="start">+ categoria: String</text>
+<text x="817" y="348" class="small" text-anchor="start">+ valor: BigDecimal</text>
+<text x="817" y="374" class="small" text-anchor="start">+ data: LocalDate</text>
+<text x="817" y="400" class="small" text-anchor="start">+ divisao: String</text>
+<text x="817" y="426" class="small" text-anchor="start">+ modeloId: Long</text>
+<text x="817" y="452" class="small" text-anchor="start">+ competencia: String</text>
+<text x="817" y="478" class="small" text-anchor="start">+ parcelas: Map&lt;Long, BigDecimal&gt;</text>
+<rect x="75" y="650" width="290" height="247" rx="5" fill="#fff" stroke="#52667c" stroke-width="2"/>
+<path d="M75,695 H365"/>
+<text x="220.0" y="680" class="head" text-anchor="middle">Pagamento</text>
+<text x="87" y="722" class="small" text-anchor="start">+ id: Long</text>
+<text x="87" y="748" class="small" text-anchor="start">+ republicaId: Long</text>
+<text x="87" y="774" class="small" text-anchor="start">+ pagadorId: Long</text>
+<text x="87" y="800" class="small" text-anchor="start">+ recebedorId: Long</text>
+<text x="87" y="826" class="small" text-anchor="start">+ valor: BigDecimal</text>
+<text x="87" y="852" class="small" text-anchor="start">+ data: LocalDate</text>
+<text x="87" y="878" class="small" text-anchor="start">+ confirmado: boolean</text>
+<rect x="440" y="650" width="290" height="143" rx="5" fill="#fff" stroke="#52667c" stroke-width="2"/>
+<path d="M440,695 H730"/>
+<text x="585.0" y="680" class="head" text-anchor="middle">Fechamento</text>
+<text x="452" y="722" class="small" text-anchor="start">+ id: Long</text>
+<text x="452" y="748" class="small" text-anchor="start">+ republicaId: Long</text>
+<text x="452" y="774" class="small" text-anchor="start">+ mes: String</text>
+<rect x="805" y="650" width="290" height="299" rx="5" fill="#fff" stroke="#52667c" stroke-width="2"/>
+<path d="M805,695 H1095"/>
+<text x="950.0" y="680" class="head" text-anchor="middle">Recorrencia</text>
+<text x="817" y="722" class="small" text-anchor="start">+ id: Long</text>
+<text x="817" y="748" class="small" text-anchor="start">+ republicaId: Long</text>
+<text x="817" y="774" class="small" text-anchor="start">+ descricao: String</text>
+<text x="817" y="800" class="small" text-anchor="start">+ categoria: String</text>
+<text x="817" y="826" class="small" text-anchor="start">+ valor: BigDecimal</text>
+<text x="817" y="852" class="small" text-anchor="start">+ pagadorId: Long</text>
+<text x="817" y="878" class="small" text-anchor="start">+ dia: int</text>
+<text x="817" y="904" class="small" text-anchor="start">+ divisao: String</text>
+<text x="817" y="930" class="small" text-anchor="start">+ participantes: Map&lt;Long, BigDecimal&gt;</text>
+<text x="40" y="1040" class="small" text-anchor="start">Associações usam IDs: administrador, autor, pagador, recebedor e participantes referenciam Morador.</text>
+<text x="40" y="1067" class="small" text-anchor="start">Parcela é um valor de Despesa.parcelas, persistido em despesa_parcelas. * significa zero ou muitos.</text>
+<text x="40" y="1094" class="small" text-anchor="start">As classes guardam dados; as regras ficam em AuthService, RepublicaService e DivisaoService.</text>
+<text x="40" y="1121" class="small" text-anchor="start">Uma Recorrencia gera várias despesas; excluir o modelo preserva as despesas e seu modeloId histórico.</text>
+</svg>

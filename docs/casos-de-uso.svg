@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="1210" viewBox="0 0 1320 1210" role="img" aria-label="Casos de uso — API de Despesas da República">
+<style>text{font-family:Arial,sans-serif;fill:#172b46;font-size:16px}.title{font-size:26px;font-weight:bold}.head{font-size:20px;font-weight:bold}.small{font-size:14px}path,line{stroke:#52667c;stroke-width:1.6;fill:none}</style>
+<rect width="100%" height="100%" fill="white"/>
+<text x="40" y="42" class="title">Casos de uso — API de Despesas da República</text>
+<rect x="280" y="65" width="850" height="1070" rx="12" fill="#fafcff" stroke="#9aabc0"/>
+<text x="705" y="95" class="head" text-anchor="middle">API REST</text>
+<circle cx="85" cy="140" r="15" fill="white" stroke="#52667c" stroke-width="2"/>
+<path d="M85,155 v45 m-30,-25 h60 m-30,25 l-25,35 m25,-35 l25,35"/>
+<text x="85" y="248" class="head" text-anchor="middle">Visitante</text>
+<circle cx="85" cy="600" r="15" fill="white" stroke="#52667c" stroke-width="2"/>
+<path d="M85,615 v45 m-30,-25 h60 m-30,25 l-25,35 m25,-35 l25,35"/>
+<text x="85" y="708" class="head" text-anchor="middle">Morador</text>
+<circle cx="1220" cy="390" r="15" fill="white" stroke="#52667c" stroke-width="2"/>
+<path d="M1220,405 v45 m-30,-25 h60 m-30,25 l-25,35 m25,-35 l25,35"/>
+<text x="1220" y="498" class="head" text-anchor="middle">Administrador</text>
+<path d="M115,175 H245 V145 H305"/>
+<ellipse cx="510" cy="145" rx="205" ry="32" fill="#eff6ff" stroke="#52667c"/>
+<text x="510" y="140" class="" text-anchor="middle">Cadastrar-se</text>
+<text x="510" y="160" class="" text-anchor="middle">RF01</text>
+<path d="M115,175 H245 V225 H305"/>
+<ellipse cx="510" cy="225" rx="205" ry="32" fill="#eff6ff" stroke="#52667c"/>
+<text x="510" y="220" class="" text-anchor="middle">Fazer login / obter JWT</text>
+<text x="510" y="240" class="" text-anchor="middle">RF02</text>
+<path d="M115,635 H250 V330 H305"/>
+<ellipse cx="510" cy="330" rx="205" ry="32" fill="#eff6ff" stroke="#52667c"/>
+<text x="510" y="325" class="" text-anchor="middle">Criar república</text>
+<text x="510" y="345" class="" text-anchor="middle">RF03</text>
+<path d="M115,635 H250 V420 H305"/>
+<ellipse cx="510" cy="420" rx="205" ry="32" fill="#eff6ff" stroke="#52667c"/>
+<text x="510" y="415" class="" text-anchor="middle">Entrar por convite</text>
+<text x="510" y="435" class="" text-anchor="middle">RF04</text>
+<path d="M115,635 H250 V510 H305"/>
+<ellipse cx="510" cy="510" rx="205" ry="32" fill="#eff6ff" stroke="#52667c"/>
+<text x="510" y="505" class="" text-anchor="middle">Sair com saldo zero</text>
+<text x="510" y="525" class="" text-anchor="middle">RF05</text>
+<path d="M115,635 H250 V600 H305"/>
+<ellipse cx="510" cy="600" rx="205" ry="32" fill="#eff6ff" stroke="#52667c"/>
+<text x="510" y="595" class="" text-anchor="middle">Lançar e dividir despesa</text>
+<text x="510" y="615" class="" text-anchor="middle">RF06</text>
+<path d="M115,635 H250 V690 H305"/>
+<ellipse cx="510" cy="690" rx="205" ry="32" fill="#eff6ff" stroke="#52667c"/>
+<text x="510" y="685" class="" text-anchor="middle">Editar / excluir despesa</text>
+<text x="510" y="705" class="" text-anchor="middle">RF08: autor ou administrador</text>
+<path d="M115,635 H250 V780 H305"/>
+<ellipse cx="510" cy="780" rx="205" ry="32" fill="#eff6ff" stroke="#52667c"/>
+<text x="510" y="775" class="" text-anchor="middle">Consultar saldo próprio e por morador</text>
+<text x="510" y="795" class="" text-anchor="middle">RF10</text>
+<path d="M115,635 H250 V870 H305"/>
+<ellipse cx="510" cy="870" rx="205" ry="32" fill="#eff6ff" stroke="#52667c"/>
+<text x="510" y="865" class="" text-anchor="middle">Registrar / confirmar pagamento</text>
+<text x="510" y="885" class="" text-anchor="middle">RF11: recebedor confirma</text>
+<path d="M115,635 H250 V960 H305"/>
+<ellipse cx="510" cy="960" rx="205" ry="32" fill="#eff6ff" stroke="#52667c"/>
+<text x="510" y="955" class="" text-anchor="middle">Simplificar dívidas</text>
+<text x="510" y="975" class="" text-anchor="middle">RF12</text>
+<path d="M115,635 H250 V1050 H305"/>
+<ellipse cx="510" cy="1050" rx="205" ry="32" fill="#eff6ff" stroke="#52667c"/>
+<text x="510" y="1045" class="" text-anchor="middle">Consultar relatórios</text>
+<text x="510" y="1065" class="" text-anchor="middle">RF13, RF14 e RF15</text>
+<path d="M1190,425 H1150 V330 H1110"/>
+<ellipse cx="940" cy="330" rx="170" ry="32" fill="#eff6ff" stroke="#52667c"/>
+<text x="940" y="325" class="" text-anchor="middle">Remover morador /</text>
+<text x="940" y="345" class="" text-anchor="middle">transferir administração (RF05)</text>
+<path d="M1190,425 H1150 V475 H1110"/>
+<ellipse cx="940" cy="475" rx="170" ry="32" fill="#eff6ff" stroke="#52667c"/>
+<text x="940" y="470" class="" text-anchor="middle">Cadastrar modelos e gerar</text>
+<text x="940" y="490" class="" text-anchor="middle">recorrências (RF07)</text>
+<path d="M1190,425 H1150 V620 H1110"/>
+<ellipse cx="940" cy="620" rx="170" ry="32" fill="#eff6ff" stroke="#52667c"/>
+<text x="940" y="615" class="" text-anchor="middle">Fechar mês</text>
+<text x="940" y="635" class="" text-anchor="middle">RF09</text>
+<text x="940" y="770" class="small" text-anchor="middle">Administrador também é morador.</text>
+<text x="940" y="795" class="small" text-anchor="middle">Herda as ações de Morador.</text>
+<text x="40" y="1170" class="small" text-anchor="start">Rotas protegidas exigem JWT. Dados restritos à própria república. Saída/remoção exige saldo zero.</text>
+</svg>
