@@ -174,11 +174,12 @@ O domínio usa seis entidades. As parcelas ficam no mapa `Despesa.parcelas`, per
 - [Diagrama de casos de uso](docs/casos-de-uso.svg)
 - [Diagrama de classes](docs/classes.svg)
 - [Fontes editáveis dos diagramas](docs/diagramas.md)
-- [Guia para apresentação](docs/apresentacao.md)
+
 
 ## Checklist da entrega
 
 RF01–RF15 implementados; JWT/Spring Security; testes unitários e funcionais; JaCoCo; Swagger; Dockerfile e docker-compose; diagramas de casos de uso e classes; README com execução, contas e endpoints.
 
-Entregue esta pasta compactada ou o link do repositório. `target/` e `data/` não precisam entrar no ZIP; testes e relatório são reproduzidos com `clean verify`. Os dois integrantes devem estudar o código e responder alternadamente na apresentação.
+`target/` e `data/` não precisam entrar no ZIP; testes e relatório são reproduzidos com `clean verify`.
+
 
