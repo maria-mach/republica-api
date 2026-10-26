@@ -43,7 +43,20 @@ banco HSQLDB em memória temporário.
 O processo de demonstração foi encerrado ao terminar.
 
 Diagramas de casos de uso e classes renderizados e conferidos visualmente.
-Dockerfile e docker-compose.yml preparados, mas o contêiner NÃO foi
-executado: Docker não está instalado neste ambiente de validação.
-Antes da apresentação, validar em uma máquina com Docker:
-docker compose up --build
+Validação Docker realizada em 25/10/2026:
+- Docker Desktop instalado; Docker Engine 29.9.2 e Compose v5.6.1.
+- Dockerfile construído com sucesso em ambiente Linux/Java 21. O comando
+  mvn -B verify dentro da etapa de construção terminou com BUILD SUCCESS.
+- Contêiner iniciado via docker compose up --build -d.
+- Projeto de teste republica-verificacao, com volume separado e uma
+  sobrescrita temporária de porta para 127.0.0.1:8081 -> 8080. A API Java
+  já existente em 8080 e seu banco local não foram interrompidos.
+- 24 verificações HTTP aprovadas no contêiner: login dos três moradores,
+  bloqueio sem JWT, moradores, despesas, parcelas/saldos, pagamento
+  pendente, confirmação somente pelo recebedor, rejeição de participante
+  nulo, relatórios, recorrências sem duplicação, fechamento e documentação.
+- Contêiner reiniciado e dados preservados no volume HSQLDB: duas despesas,
+  um pagamento confirmado, saldo esperado e recorrência sem nova geração.
+- Dockerfile e docker-compose.yml da entrega não precisaram de correção.
+
+Para reproduzir em uma porta 8080 livre: docker compose up --build
