@@ -77,6 +77,8 @@ Ana fica com R$ 50 a receber e Bia com R$ 50 a pagar. Como Bia, registre em `POS
 
 O saldo permanece igual até Ana executar `POST /pagamentos/{id}/confirmar`. Depois ambos ficam com saldo zero. Ana pode fechar o mês em `POST /fechamentos/2026-10`; editar ou excluir a despesa passa a retornar erro.
 
+Para repetir a demonstração, escolha um mês ainda aberto e consulte o histórico antes de criar outra despesa. O fechamento é persistente e não há rota de reabertura. Use uma data de pagamento que não esteja no futuro.
+
 Para testar divisão por percentual, use `"divisao": "PERCENTUAL"` e participantes com `parte` somando 100. Para divisão por valor, use `"divisao": "VALOR"` e `parte` somando o valor da despesa.
 
 Para recorrência, envie a `POST /recorrencias` um objeto `{"dia": 10, "despesa": ...}`, substituindo `...` pelo objeto completo de uma despesa. A administradora gera os modelos com `POST /recorrencias/gerar/2026-11`. Repetir a geração não duplica as despesas daquele modelo/mês.
@@ -151,7 +153,7 @@ sh mvnw clean verify
 O comando executa os testes unitários e funcionais, gera o JAR em `target/republica-api-1.0.0.jar` e o relatório de cobertura em **`target/site/jacoco/index.html`**. Abra esse HTML no navegador. Relatórios dos testes ficam em `target/surefire-reports/`. Não há porcentagem mínima de cobertura imposta, pois o enunciado exige a configuração do JaCoCo e não define uma meta.
 
 - `DivisaoServiceTest`: regras de divisão, centavos e somas inválidas.
-- `RepublicaApiTest`: testes funcionais HTTP com MockMvc, Spring Security e banco H2 em memória, cobrindo autenticação, isolamento, permissões, pagamentos, recorrências, fechamento, relatórios e rollback.
+- `RepublicaApiTest`: testes funcionais HTTP com MockMvc, Spring Security e banco H2 em memória, cobrindo autenticação, isolamento, permissões, pagamentos, recorrências, fechamento, relatórios, rollback, as três formas de divisão e rejeição de participantes nulos.
 - `DadosDemonstracaoTest`: contas de demonstração, login, vínculo com a república e inicialização sem duplicação.
 
 Os testes não usam o banco persistente da aplicação. O Mockito é carregado como agente de teste pelo Maven, evitando a anexação dinâmica de agentes no Java 21. O agente JaCoCo permanece habilitado para medir a cobertura.

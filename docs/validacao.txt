@@ -7,8 +7,8 @@ Resultado: sucesso; target/republica-api-1.0.0.jar gerado.
 Testes:
 - DadosDemonstracaoTest: 1 aprovado.
 - DivisaoServiceTest: 6 aprovados.
-- RepublicaApiTest: 17 aprovados.
-Total: 24 testes; zero falhas, erros ou ignorados.
+- RepublicaApiTest: 19 aprovados.
+Total: 26 testes; zero falhas, erros ou ignorados.
 Banco dos testes: H2 em memória, isolado dos dados reais.
 
 JaCoCo 0.8.12:
@@ -16,6 +16,15 @@ JaCoCo 0.8.12:
 - Instruções: 2582 cobertas de 2732 (94,51%).
 - Decisões: 111 cobertas de 134 (82,84%).
 Relatório reproduzível: target/site/jacoco/index.html.
+
+Revisão final da entrega:
+- Comando clean verify executado novamente com sucesso em 25/10/2026.
+- Participantes nulos são rejeitados com 400 no lançamento, edição e modelo
+  recorrente, sem gravações parciais. Cenário reproduzido antes da correção.
+- Divisão percentual e por valor verificadas também pela API, com parcelas
+  e saldos resultantes conferidos.
+- Links locais do README e XML dos diagramas SVG verificados.
+- Os PDFs e guias pessoais não fazem parte dos arquivos da entrega atual.
 
 Validação adicional: JAR iniciado na porta 8081, perfil demo,
 banco HSQLDB em memória temporário.

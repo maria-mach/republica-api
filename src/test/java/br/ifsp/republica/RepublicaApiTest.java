@@ -176,4 +176,28 @@ class RepublicaApiTest {
   assertEquals(-90,value(saldoBia,"saldo"));
   assertEquals(-90,value(saldoBia,"porMorador[0].saldo"));
  }
+ @Test void rejeitaParticipanteNuloComErroDeValidacao() throws Exception {
+  var invalida=despesa("IGUAL","null","100.00","2026-10-01");
+  var erro=call(post("/despesas"),ana,invalida,400);
+  assertEquals("Verifique os campos informados",str(erro,"message"));
+  assertTrue(erro.contains("participantes[0]"));
+  assertEquals(0,despesas.count());
+  call(post("/recorrencias"),ana,"{\"dia\":10,\"despesa\":"+invalida+"}",400);
+  assertEquals(0,recorrencias.count());
+  long d=criar();
+  call(put("/despesas/"+d),ana,invalida,400);
+  assertEquals(50,value(call(get("/saldos/me"),ana,null,200),"saldo"));
+ }
+ @Test void divisaoPercentualEPorValorFuncionamPelaApi() throws Exception {
+  var ps="{\"moradorId\":"+a+",\"parte\":25},{\"moradorId\":"+b+",\"parte\":75}";
+  var percentual=call(post("/despesas"),ana,despesa("PERCENTUAL",ps,"200.00","2026-10-01"),201);
+  assertEquals(50,value(percentual,"parcelas['"+a+"']"));
+  assertEquals(150,value(percentual,"parcelas['"+b+"']"));
+  ps="{\"moradorId\":"+a+",\"parte\":60},{\"moradorId\":"+b+",\"parte\":140}";
+  var valores=call(post("/despesas"),ana,despesa("VALOR",ps,"200.00","2026-10-01"),201);
+  assertEquals(60,value(valores,"parcelas['"+a+"']"));
+  assertEquals(140,value(valores,"parcelas['"+b+"']"));
+  assertEquals(290,value(call(get("/saldos/me"),ana,null,200),"saldo"));
+  assertEquals(-290,value(call(get("/saldos/me"),bia,null,200),"saldo"));
+ }
 }

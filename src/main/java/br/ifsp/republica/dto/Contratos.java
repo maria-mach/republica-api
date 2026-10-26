@@ -21,7 +21,7 @@ public final class Contratos {
         @NotNull @DecimalMin("0.01") @Digits(integer=17,fraction=2) BigDecimal valor,
         @NotNull LocalDate data, @NotBlank @Size(max=100) String categoria,
         @NotNull Long pagadorId, @NotBlank @Pattern(regexp="IGUAL|PERCENTUAL|VALOR") String divisao,
-        @NotEmpty List<@Valid Participante> participantes) {}
+        @NotEmpty List<@NotNull @Valid Participante> participantes) {}
     public record NovaRecorrencia(@NotNull @Valid NovaDespesa despesa, @Min(1) @Max(31) int dia) {}
     public record NovoPagamento(@NotNull Long recebedorId,
         @NotNull @DecimalMin("0.01") @Digits(integer=17,fraction=2) BigDecimal valor, @NotNull LocalDate data) {}
