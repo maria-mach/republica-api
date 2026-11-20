@@ -52,7 +52,7 @@ class RepublicaApiTest {
  long criar() throws Exception { return num(call(post("/despesas"),ana,igual("100.00"),201),"id"); }
  @Test void bancoIsoladoESenhasProtegidas() throws Exception {
   try(var conn=dataSource.getConnection()){assertTrue(conn.getMetaData().getURL().startsWith("jdbc:h2:mem:republica-test"));}
-  assertTrue(moradores.findById(a).orElseThrow().senhaHash.startsWith("$2"));
+  assertTrue(moradores.findById(a).orElseThrow().getSenhaHash().startsWith("$2"));
   var eu=call(get("/moradores/me"),ana,null,200);assertFalse(eu.contains("senha"));
  }
  @Test void autenticacaoValidacaoEEmailUnico() throws Exception {

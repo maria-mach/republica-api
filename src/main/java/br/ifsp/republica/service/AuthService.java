@@ -1,47 +1,102 @@
 package br.ifsp.republica.service;
 
-import br.ifsp.republica.dto.Contratos.*;
+import br.ifsp.republica.dto.Contratos.Cadastro;
+import br.ifsp.republica.dto.Contratos.Login;
+import br.ifsp.republica.dto.Contratos.Token;
+import br.ifsp.republica.dto.Contratos.Usuario;
+import br.ifsp.republica.exception.RegraException;
 import br.ifsp.republica.model.Morador;
 import br.ifsp.republica.repository.MoradorRepository;
-import br.ifsp.republica.exception.RegraException;
-import java.time.Instant;
+import br.ifsp.republica.security.ParametrosToken;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.jwt.*;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 
 @Service
 public class AuthService {
+
+    private static final String HASH_PARA_USUARIO_AUSENTE =
+        "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
+
     private final MoradorRepository moradores;
-    private final PasswordEncoder passwords;
-    private final JwtEncoder encoder;
-    public AuthService(MoradorRepository moradores,PasswordEncoder passwords,JwtEncoder encoder) {
-        this.moradores=moradores;this.passwords=passwords;this.encoder=encoder;
+    private final PasswordEncoder passwordEncoder;
+    private final EmissorDeToken emissorDeToken;
+
+    public AuthService(
+            MoradorRepository moradores,
+            PasswordEncoder passwordEncoder,
+            EmissorDeToken emissorDeToken) {
+        this.moradores = moradores;
+        this.passwordEncoder = passwordEncoder;
+        this.emissorDeToken = emissorDeToken;
     }
-    public static Usuario usuario(Morador m) { return new Usuario(m.id,m.nome,m.email,m.republicaId); }
+
     @Transactional
-    public Usuario cadastrar(Cadastro dto) {
-        String email=dto.email().strip().toLowerCase(Locale.ROOT);
-        if (moradores.findByEmail(email).isPresent()) throw new RegraException(HttpStatus.CONFLICT,"E-mail já cadastrado");
-        if(dto.senha().getBytes(java.nio.charset.StandardCharsets.UTF_8).length>72)
-            throw RegraException.invalido("Senha deve ter no máximo 72 bytes em UTF-8");
-        Morador m=new Morador();m.nome=dto.nome().strip();m.email=email;m.senhaHash=passwords.encode(dto.senha());
-        return usuario(moradores.save(m));
+    public Usuario cadastrar(Cadastro cadastro) {
+        String email = normalizarEmail(cadastro.email());
+        exigirEmailDisponivel(email);
+        exigirSenhaDentroDoLimite(cadastro.senha());
+
+        Morador morador = new Morador();
+        morador.setNome(cadastro.nome().strip());
+        morador.setEmail(email);
+        morador.setSenhaHash(passwordEncoder.encode(cadastro.senha()));
+
+        return Usuario.from(moradores.save(morador));
     }
-    public Token login(Login dto) {
-        var m=moradores.findByEmail(dto.email().strip().toLowerCase(Locale.ROOT));
-        String hash=m.map(u->u.senhaHash).orElse("$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy");
-        String senha=dto.senha();
-        if(senha.getBytes(java.nio.charset.StandardCharsets.UTF_8).length>72) senha="";
-        boolean ok=passwords.matches(senha,hash);
-        if(m.isEmpty() || !ok) throw new RegraException(HttpStatus.UNAUTHORIZED,"Credenciais inválidas");
-        Instant now=Instant.now();
-        var claims=JwtClaimsSet.builder().issuer("republica-api").subject(m.get().id.toString())
-            .issuedAt(now).expiresAt(now.plusSeconds(7200)).build();
-        String token=encoder.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(),claims)).getTokenValue();
-        return new Token(token,"Bearer",7200,usuario(m.get()));
+
+    public Token login(Login credenciais) {
+        Optional<Morador> moradorEncontrado = moradores.findByEmail(normalizarEmail(credenciais.email()));
+
+        if (!credenciaisSaoValidas(moradorEncontrado, credenciais.senha())) {
+            throw new RegraException(HttpStatus.UNAUTHORIZED, "Credenciais inválidas");
+        }
+
+        Morador morador = moradorEncontrado.get();
+        String token = emissorDeToken.emitirPara(morador);
+
+        return new Token(
+            token,
+            ParametrosToken.TIPO,
+            ParametrosToken.VALIDADE_SEGUNDOS,
+            Usuario.from(morador));
+    }
+
+    private boolean credenciaisSaoValidas(Optional<Morador> moradorEncontrado, String senhaInformada) {
+        // Também compara um hash quando a conta não existe para reduzir diferenças de tempo.
+        String hashParaComparacao = moradorEncontrado
+            .map(Morador::getSenhaHash)
+            .orElse(HASH_PARA_USUARIO_AUSENTE);
+
+        // Senha acima do limite nunca é aceita; comparar texto vazio evita erro do BCrypt.
+        String senhaParaComparacao = excedeLimiteDeBytes(senhaInformada) ? "" : senhaInformada;
+        boolean senhaCorreta = passwordEncoder.matches(senhaParaComparacao, hashParaComparacao);
+
+        return moradorEncontrado.isPresent() && senhaCorreta;
+    }
+
+    private void exigirEmailDisponivel(String email) {
+        if (moradores.findByEmail(email).isPresent()) {
+            throw new RegraException(HttpStatus.CONFLICT, "E-mail já cadastrado");
+        }
+    }
+
+    private void exigirSenhaDentroDoLimite(String senha) {
+        if (excedeLimiteDeBytes(senha)) {
+            throw RegraException.invalido(
+                "Senha deve ter no máximo " + ParametrosToken.LIMITE_SENHA_BYTES + " bytes em UTF-8");
+        }
+    }
+
+    private String normalizarEmail(String email) {
+        return email.strip().toLowerCase(Locale.ROOT);
+    }
+
+    private boolean excedeLimiteDeBytes(String senha) {
+        return senha.getBytes(StandardCharsets.UTF_8).length > ParametrosToken.LIMITE_SENHA_BYTES;
     }
 }

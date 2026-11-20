@@ -1,31 +1,58 @@
 package br.ifsp.republica.exception;
 
-import java.time.Instant;
-import java.util.*;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.http.*;
-import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
+import java.time.Instant;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
-    private ResponseEntity<?> erro(HttpStatus status,String message,Object fields,HttpServletRequest req) {
-        return ResponseEntity.status(status).body(Map.of("timestamp",Instant.now().toString(),"status",status.value(),
-            "message",message,"path",req.getRequestURI(),"fields",fields));
-    }
+
+    private static final String MENSAGEM_CAMPOS_INVALIDOS = "Verifique os campos informados";
+    private static final String MENSAGEM_FORMATO_INVALIDO = "Corpo, data ou parâmetro inválido";
+    private static final String MENSAGEM_CONFLITO = "Registro duplicado ou em conflito";
+
     @ExceptionHandler(RegraException.class)
-    ResponseEntity<?> regra(RegraException e,HttpServletRequest r) { return erro(e.status,e.getMessage(),Map.of(),r); }
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    ResponseEntity<?> validacao(MethodArgumentNotValidException e,HttpServletRequest r) {
-        Map<String,String> fields=new LinkedHashMap<>();
-        e.getBindingResult().getFieldErrors().forEach(f->fields.put(f.getField(),f.getDefaultMessage()));
-        return erro(HttpStatus.BAD_REQUEST,"Verifique os campos informados",fields,r);
+    ResponseEntity<?> tratarRegra(RegraException excecao, HttpServletRequest requisicao) {
+        return montarResposta(excecao.getStatus(), excecao.getMessage(), Map.of(), requisicao);
     }
-    @ExceptionHandler({HttpMessageNotReadableException.class,MethodArgumentTypeMismatchException.class})
-    ResponseEntity<?> formato(Exception e,HttpServletRequest r) { return erro(HttpStatus.BAD_REQUEST,"Corpo, data ou parâmetro inválido",Map.of(),r); }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    ResponseEntity<?> tratarValidacao(MethodArgumentNotValidException excecao, HttpServletRequest requisicao) {
+        Map<String, String> campos = new LinkedHashMap<>();
+        excecao.getBindingResult().getFieldErrors()
+            .forEach(erro -> campos.put(erro.getField(), erro.getDefaultMessage()));
+
+        return montarResposta(HttpStatus.BAD_REQUEST, MENSAGEM_CAMPOS_INVALIDOS, campos, requisicao);
+    }
+
+    @ExceptionHandler({HttpMessageNotReadableException.class, MethodArgumentTypeMismatchException.class})
+    ResponseEntity<?> tratarFormatoInvalido(Exception excecao, HttpServletRequest requisicao) {
+        return montarResposta(HttpStatus.BAD_REQUEST, MENSAGEM_FORMATO_INVALIDO, Map.of(), requisicao);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
-    ResponseEntity<?> conflito(Exception e,HttpServletRequest r) { return erro(HttpStatus.CONFLICT,"Registro duplicado ou em conflito",Map.of(),r); }
+    ResponseEntity<?> tratarConflito(Exception excecao, HttpServletRequest requisicao) {
+        return montarResposta(HttpStatus.CONFLICT, MENSAGEM_CONFLITO, Map.of(), requisicao);
+    }
+
+    private ResponseEntity<?> montarResposta(
+            HttpStatus status, String mensagem, Object campos, HttpServletRequest requisicao) {
+        Map<String, Object> corpo = Map.of(
+            "timestamp", Instant.now().toString(),
+            "status", status.value(),
+            "message", mensagem,
+            "path", requisicao.getRequestURI(),
+            "fields", campos);
+
+        return ResponseEntity.status(status).body(corpo);
+    }
 }

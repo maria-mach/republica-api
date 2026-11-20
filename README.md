@@ -158,30 +158,58 @@ O comando executa os testes unitários e funcionais, gera o JAR em `target/repub
 
 Os testes não usam o banco persistente da aplicação. O Mockito é carregado como agente de teste pelo Maven, evitando a anexação dinâmica de agentes no Java 21. O agente JaCoCo permanece habilitado para medir a cobertura.
 
-## Organização e diagramas
+## Estrutura de pacotes
 
 ```text
 src/main/java/br/ifsp/republica/
-  config/       JWT, Swagger e dados de demonstração
-  controller/   recebe HTTP e devolve DTOs
-  dto/          contratos de entrada e saída
+  config/       JWT, segurança, OpenAPI e dados de demonstração
+  controller/   recebem HTTP, chamam um service e devolvem DTOs (sem regra de negócio)
+  dto/          contratos de entrada (Contratos) e de saída (Respostas)
+  exception/    RegraException e tratamento centralizado de erros
+  model/        entidades JPA e enums (TipoDivisao, TipoEvento)
+  repository/   acesso a dados (Spring Data JPA)
+  security/     parâmetros do token (emissor, validade, limite de senha)
   service/      regras de negócio e transações
-  repository/   consultas JPA
-  model/        entidades persistidas
-  exception/    exceções e tratamento centralizado
+  util/         Competencias (AAAA-MM) e Dinheiro (escala monetária)
 ```
 
-O domínio usa seis entidades. As parcelas ficam no mapa `Despesa.parcelas`, persistido na tabela `despesa_parcelas`; por isso não existe uma classe `Parcela` separada. Os relacionamentos guardam IDs e são validados pelo serviço.
+O domínio usa seis entidades. As parcelas ficam no mapa `Despesa.parcelas`, persistido em `despesa_parcelas`; não existe classe `Parcela`. Os relacionamentos guardam IDs e são validados pelos services. Os campos das entidades são privados; use getters e os métodos de domínio (`Despesa.foiPagaPor`, `Pagamento.envolve`, `Republica.administradaPor`...).
+
+## Responsabilidade de cada service
+
+| Classe | Responsabilidade |
+|---|---|
+| `AuthService` | Cadastro e login (e-mail normalizado, limite de 72 bytes, hash fixo para usuário inexistente) |
+| `EmissorDeToken` | Gera o JWT HS256 com validade de 2 horas |
+| `MembroService` | Criar/entrar/sair da república, transferir administração, listar membros |
+| `DespesaService` | Lançar, editar, excluir, buscar e listar despesas |
+| `RegrasDespesa` | Validações e preenchimento da despesa, compartilhados por lançamento, edição e recorrência |
+| `DivisaoService` | Divide o valor (`IGUAL`, `PERCENTUAL`, `VALOR`); o pagador assume os centavos residuais |
+| `RecorrenciaService` | Modelos de despesa recorrente e geração mensal |
+| `PagamentoService` | Registrar, confirmar e listar pagamentos |
+| `SaldoService` | Saldo do morador, saldo por morador e saldos da república |
+| `SimplificadorDeDividas` | Algoritmo puro que sugere transferências a partir dos saldos |
+| `RelatorioService` | Gastos por categoria, gastos mensais e extrato |
+| `FechamentoService` | Fechar mês e exigir mês aberto |
+| `ContextoRepublica` | Busca morador/república, trava por república e verificações de pertencimento e administração |
+
+Dependências (sem ciclos): `RegrasDespesa` → `ContextoRepublica`, `FechamentoService`, `DivisaoService`; `DespesaService`/`RecorrenciaService` → `RegrasDespesa`; `RelatorioService` → `DespesaService`; `MembroService` → `SaldoService`.
+
+Operações que alteram dados começam por `ContextoRepublica.bloquearRepublica`, que mantém uma trava por república até o fim da transação.
+
+## Padrões de código
+
+- Tipos explícitos (sem `var`), uma instrução por linha e `if`/`for` sempre com chaves; sem imports com `*`.
+- Nomes completos e em português do domínio, sem abreviações. Parâmetros de usuário se chamam `usuarioId`.
+- Poucos comentários: só para explicar um porquê não óbvio (trava por república, resíduo para o pagador, hash fixo no login). O restante se explica pelos nomes.
+- Sem repetição: lógica compartilhada fica em componentes (`RegrasDespesa`, `ContextoRepublica`), métodos de entidade ou utilitários (`Competencias`, `Dinheiro`).
+- Cada classe tem uma responsabilidade: controllers só recebem e devolvem dados, services concentram as regras, repositories só acessam dados.
+- Sem números ou textos mágicos: valores de negócio são constantes ou enums (`TipoDivisao`, `TipoEvento`, `ParametrosToken`). O contrato da API continua recebendo e devolvendo texto.
+- Métodos curtos, no mesmo nível de abstração e com poucos parâmetros; preferem retornar valores a alterar o que recebem (ex.: `DivisaoService.dividir` devolve um novo mapa).
+- Não mudar rotas, DTOs, códigos HTTP, mensagens de erro, ordem de validações, arredondamentos, segurança ou transações sem decisão explícita.
+
+## Diagramas
 
 - [Diagrama de casos de uso](docs/casos-de-uso.svg)
 - [Diagrama de classes](docs/classes.svg)
 - [Fontes editáveis dos diagramas](docs/diagramas.md)
-
-
-## Checklist da entrega
-
-RF01–RF15 implementados; JWT/Spring Security; testes unitários e funcionais; JaCoCo; Swagger; Dockerfile e docker-compose; diagramas de casos de uso e classes; README com execução, contas e endpoints.
-
-`target/` e `data/` não precisam entrar no ZIP; testes e relatório são reproduzidos com `clean verify`.
-
-

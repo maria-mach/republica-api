@@ -1,57 +1,116 @@
 package br.ifsp.republica.service;
 
 import br.ifsp.republica.dto.Contratos.NovaDespesa;
+import br.ifsp.republica.dto.Contratos.Participante;
 import br.ifsp.republica.exception.RegraException;
+import br.ifsp.republica.model.TipoDivisao;
+import br.ifsp.republica.util.Dinheiro;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DivisaoService {
+
+    private static final BigDecimal TOTAL_PERCENTUAL = new BigDecimal("100");
+
     public Map<Long, BigDecimal> dividir(NovaDespesa despesa) {
-        Map<Long, BigDecimal> parcelas = new LinkedHashMap<>();
-        for (var participante : despesa.participantes()) {
-            if (parcelas.containsKey(participante.moradorId())) {
+        exigirParticipantesSemRepeticao(despesa.participantes());
+
+        Map<Long, BigDecimal> parcelas = calcularParcelas(despesa);
+
+        return atribuirResiduoAoPagador(despesa, parcelas);
+    }
+
+    private void exigirParticipantesSemRepeticao(List<Participante> participantes) {
+        Set<Long> moradoresVistos = new HashSet<>();
+        for (Participante participante : participantes) {
+            if (!moradoresVistos.add(participante.moradorId())) {
                 throw RegraException.invalido("Participante repetido");
             }
-            parcelas.put(participante.moradorId(), BigDecimal.ZERO.setScale(2));
+        }
+    }
+
+    private Map<Long, BigDecimal> calcularParcelas(NovaDespesa despesa) {
+        TipoDivisao tipo = TipoDivisao.valueOf(despesa.divisao());
+        if (tipo == TipoDivisao.IGUAL) {
+            return dividirIgualmente(despesa);
         }
 
-        BigDecimal soma = BigDecimal.ZERO;
-        if ("IGUAL".equals(despesa.divisao())) {
-            BigDecimal parte = despesa.valor().divide(
-                BigDecimal.valueOf(parcelas.size()), 2, RoundingMode.DOWN);
-            parcelas.replaceAll((id, valor) -> parte);
-            soma = parte.multiply(BigDecimal.valueOf(parcelas.size()));
-        } else {
-            BigDecimal somaDasPartes = BigDecimal.ZERO;
-            boolean percentual = "PERCENTUAL".equals(despesa.divisao());
-            for (var participante : despesa.participantes()) {
-                BigDecimal parte = participante.parte();
-                if (parte == null || parte.signum() < 0) {
-                    throw RegraException.invalido("Informe a parte não negativa de cada participante");
-                }
-                somaDasPartes = somaDasPartes.add(parte);
-                BigDecimal valor = percentual
-                    ? despesa.valor().multiply(parte).divide(new BigDecimal("100"), 2, RoundingMode.DOWN)
-                    : parte.setScale(2, RoundingMode.UNNECESSARY);
-                parcelas.put(participante.moradorId(), valor);
-                soma = soma.add(valor);
-            }
-            BigDecimal esperado = percentual ? new BigDecimal("100") : despesa.valor();
-            if (somaDasPartes.compareTo(esperado) != 0) {
-                throw RegraException.invalido("A soma deve ser " + esperado);
-            }
+        return dividirPorPartesInformadas(despesa, tipo);
+    }
+
+    private Map<Long, BigDecimal> dividirIgualmente(NovaDespesa despesa) {
+        BigDecimal quantidadeParticipantes = BigDecimal.valueOf(despesa.participantes().size());
+        BigDecimal valorParcela = despesa.valor().divide(
+            quantidadeParticipantes, Dinheiro.CASAS_DECIMAIS, RoundingMode.DOWN);
+
+        Map<Long, BigDecimal> parcelas = new LinkedHashMap<>();
+        for (Participante participante : despesa.participantes()) {
+            parcelas.put(participante.moradorId(), valorParcela);
         }
 
-        // O pagador pode pagar pelos outros sem participar da divisão.
-        // Se sobram centavos, ele assume o resíduo, conforme a regra do tema.
-        BigDecimal resto = despesa.valor().subtract(soma);
-        if (resto.signum() != 0) {
-            parcelas.merge(despesa.pagadorId(), resto, BigDecimal::add);
-        }
         return parcelas;
+    }
+
+    private Map<Long, BigDecimal> dividirPorPartesInformadas(NovaDespesa despesa, TipoDivisao tipo) {
+        Map<Long, BigDecimal> parcelas = new LinkedHashMap<>();
+        BigDecimal somaDasPartes = BigDecimal.ZERO;
+
+        for (Participante participante : despesa.participantes()) {
+            BigDecimal parteInformada = exigirParteNaoNegativa(participante);
+            somaDasPartes = somaDasPartes.add(parteInformada);
+            parcelas.put(participante.moradorId(), converterParteEmValor(despesa, tipo, parteInformada));
+        }
+
+        exigirSomaEsperada(despesa, tipo, somaDasPartes);
+
+        return parcelas;
+    }
+
+    private BigDecimal exigirParteNaoNegativa(Participante participante) {
+        BigDecimal parte = participante.parte();
+        if (parte == null || parte.signum() < 0) {
+            throw RegraException.invalido("Informe a parte não negativa de cada participante");
+        }
+
+        return parte;
+    }
+
+    private BigDecimal converterParteEmValor(NovaDespesa despesa, TipoDivisao tipo, BigDecimal parte) {
+        if (tipo == TipoDivisao.PERCENTUAL) {
+            return despesa.valor()
+                .multiply(parte)
+                .divide(TOTAL_PERCENTUAL, Dinheiro.CASAS_DECIMAIS, RoundingMode.DOWN);
+        }
+
+        return parte.setScale(Dinheiro.CASAS_DECIMAIS, RoundingMode.UNNECESSARY);
+    }
+
+    private void exigirSomaEsperada(NovaDespesa despesa, TipoDivisao tipo, BigDecimal somaDasPartes) {
+        BigDecimal somaEsperada = tipo == TipoDivisao.PERCENTUAL ? TOTAL_PERCENTUAL : despesa.valor();
+        if (somaDasPartes.compareTo(somaEsperada) != 0) {
+            throw RegraException.invalido("A soma deve ser " + somaEsperada);
+        }
+    }
+
+    private Map<Long, BigDecimal> atribuirResiduoAoPagador(
+            NovaDespesa despesa, Map<Long, BigDecimal> parcelas) {
+        BigDecimal totalDistribuido = parcelas.values().stream()
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal residuo = despesa.valor().subtract(totalDistribuido);
+
+        Map<Long, BigDecimal> parcelasComResiduo = new LinkedHashMap<>(parcelas);
+        if (residuo.signum() != 0) {
+            // O pagador assume os centavos restantes, mesmo se não participar da divisão.
+            parcelasComResiduo.merge(despesa.pagadorId(), residuo, BigDecimal::add);
+        }
+
+        return parcelasComResiduo;
     }
 }

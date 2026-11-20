@@ -4,7 +4,8 @@ import br.ifsp.republica.config.DadosDemonstracao;
 import br.ifsp.republica.dto.Contratos.Login;
 import br.ifsp.republica.repository.MoradorRepository;
 import br.ifsp.republica.service.AuthService;
-import br.ifsp.republica.service.RepublicaService;
+import br.ifsp.republica.service.MembroService;
+import br.ifsp.republica.service.SaldoService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.DefaultApplicationArguments;
@@ -17,7 +18,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class DadosDemonstracaoTest {
     @Autowired MoradorRepository moradores;
     @Autowired AuthService auth;
-    @Autowired RepublicaService republicas;
+    @Autowired MembroService membroService;
+    @Autowired SaldoService saldoService;
     @Autowired DadosDemonstracao dados;
 
     @Test
@@ -28,8 +30,8 @@ class DadosDemonstracaoTest {
         var caio = auth.login(new Login("caio@teste.com", "senha12345")).usuario();
         assertEquals(ana.republicaId(), bia.republicaId());
         assertEquals(ana.republicaId(), caio.republicaId());
-        assertEquals(ana.id(), republicas.republica(ana.id()).administradorId);
-        assertEquals(0, republicas.saldo(bia.id()).saldo().signum());
+        assertEquals(ana.id(), membroService.buscarRepublica(ana.id()).getAdministradorId());
+        assertEquals(0, saldoService.saldo(bia.id()).saldo().signum());
 
         dados.run(new DefaultApplicationArguments());
         assertEquals(3, moradores.count());
